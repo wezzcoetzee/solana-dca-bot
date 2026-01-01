@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  dca-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dca-bot
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/dca_bot
+      - SCHEDULE=${SCHEDULE}
+      - RPC_ENDPOINT=${RPC_ENDPOINT}
+      - JUPITER_API_KEY=${JUPITER_API_KEY}
+      - MNEMONIC=${MNEMONIC}
+      - DEST_WALLET=${DEST_WALLET}
+      - CB_BTC_ADDRESS=${CB_BTC_ADDRESS}
+      - USDC_ADDRESS=${USDC_ADDRESS}
+      - USD_AMOUNT_BUY=${USD_AMOUNT_BUY}
+      - SLIPPAGE=${SLIPPAGE}
+      - TELEGRAM_BOT_ID=${TELEGRAM_BOT_ID}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dca-bot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dca_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
