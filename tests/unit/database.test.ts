@@ -20,20 +20,21 @@ describe("DatabaseProvider", () => {
 
   describe("insertTransactionAsync", () => {
     test("calls prisma create with correct data", async () => {
-      await provider.insertTransactionAsync("wallet1", 100, 50000);
+      await provider.insertTransactionAsync("wallet1", 100, 50000, "BTC");
 
       expect(mockPrisma.transaction.create).toHaveBeenCalledWith({
         data: {
           wallet: "wallet1",
           amount: 100,
           tokenPrice: 50000,
+          symbol: "BTC",
         },
       });
     });
 
     test("handles multiple inserts", async () => {
-      await provider.insertTransactionAsync("wallet1", 100, 50000);
-      await provider.insertTransactionAsync("wallet2", 200, 55000);
+      await provider.insertTransactionAsync("wallet1", 100, 50000, "BTC");
+      await provider.insertTransactionAsync("wallet2", 200, 55000, "ETH");
 
       expect(mockPrisma.transaction.create).toHaveBeenCalledTimes(2);
     });
@@ -62,6 +63,7 @@ describe("DatabaseProvider", () => {
           wallet: "wallet1",
           amount: 100,
           tokenPrice: 50000,
+          symbol: "BTC",
         },
       ];
 
@@ -77,6 +79,7 @@ describe("DatabaseProvider", () => {
         wallet: "wallet1",
         amount: 100,
         tokenPrice: 50000,
+        symbol: "BTC",
       });
     });
   });

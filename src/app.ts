@@ -58,7 +58,8 @@ async function run() {
     await databaseProvider.insertTransactionAsync(
       destinationWallet.toString(),
       usdAmount,
-      price
+      price,
+      targetTokenSymbol
     );
     const {
       amountPurchased,

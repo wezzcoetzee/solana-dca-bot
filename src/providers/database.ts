@@ -30,13 +30,15 @@ export default class DatabaseProvider implements ITransactionRepository {
   async insertTransactionAsync(
     wallet: string,
     amount: number,
-    tokenPrice: number
+    tokenPrice: number,
+    symbol: string
   ): Promise<void> {
     await this.prisma.transaction.create({
       data: {
         wallet,
         amount,
         tokenPrice,
+        symbol,
       },
     });
     console.log("Database: Transaction saved");
@@ -53,6 +55,7 @@ export default class DatabaseProvider implements ITransactionRepository {
       wallet: tx.wallet,
       amount: tx.amount,
       tokenPrice: tx.tokenPrice,
+      symbol: tx.symbol,
     }));
   }
 

@@ -4,13 +4,15 @@ export interface Transaction {
   wallet: string;
   amount: number;
   tokenPrice: number;
+  symbol: string;
 }
 
 export interface ITransactionRepository {
   insertTransactionAsync(
     wallet: string,
     amount: number,
-    tokenPrice: number
+    tokenPrice: number,
+    symbol: string
   ): Promise<void>;
   getTransactionsAsync(wallet: string): Promise<Transaction[]>;
 }
