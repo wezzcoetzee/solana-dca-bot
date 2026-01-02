@@ -26,7 +26,7 @@ describe("DatabaseProvider", () => {
         data: {
           wallet: "wallet1",
           amount: 100,
-          btcPrice: 50000,
+          tokenPrice: 50000,
         },
       });
     });
@@ -61,7 +61,7 @@ describe("DatabaseProvider", () => {
           date: new Date("2024-01-01"),
           wallet: "wallet1",
           amount: 100,
-          btcPrice: 50000,
+          tokenPrice: 50000,
         },
       ];
 
@@ -76,7 +76,7 @@ describe("DatabaseProvider", () => {
         date: new Date("2024-01-01"),
         wallet: "wallet1",
         amount: 100,
-        btcPrice: 50000,
+        tokenPrice: 50000,
       });
     });
   });

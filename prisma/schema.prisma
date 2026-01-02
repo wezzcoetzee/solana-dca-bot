@@ -7,11 +7,12 @@ datasource db {
 }
 
 model Transaction {
-  id       String   @id @default(uuid())
-  date     DateTime @default(now())
-  wallet   String   @db.VarChar(64)
-  amount   Float
-  btcPrice Float    @map("btc_price")
+  id         String   @id @default(uuid())
+  date       DateTime @default(now())
+  wallet     String   @db.VarChar(64)
+  amount     Float
+  tokenPrice Float    @map("token_price")
+  symbol     String   @db.VarChar(16)
 
   @@index([wallet])
   @@map("transactions")

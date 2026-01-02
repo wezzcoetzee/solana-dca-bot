@@ -1,7 +1,7 @@
 export const Config = {
-  solscan: {
-    txUrl: "https://solscan.io/tx",
-    accountUrl: "https://solscan.io/account",
+  bloackchainExplorer: {
+    txUrl: "https://www.orbmarkets.io/tx",
+    accountUrl: "https://www.orbmarkets.io/address",
   },
   telegram: {
     botUrl: "https://api.telegram.org/bot",

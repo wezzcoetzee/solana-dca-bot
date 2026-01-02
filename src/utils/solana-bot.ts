@@ -60,17 +60,17 @@ export default class SolanaBot {
 
     if (!quote) throw new Error("No quote found for swap");
 
-    const cbBtcAccounts = await this.connection.getTokenAccountsByOwner(
+    const tokenAccounts = await this.connection.getTokenAccountsByOwner(
       destinationWallet,
       { mint: buying }
     );
     let destinationTokenAccount;
-    if (cbBtcAccounts.value.length === 0) {
+    if (tokenAccounts.value.length === 0) {
       throw new Error(
-        "Destination wallet has no cbBTC token account - use destinationWallet instead or create one"
+        "Destination wallet has no token account for the target token - create one first"
       );
     } else {
-      destinationTokenAccount = cbBtcAccounts.value[0].pubkey;
+      destinationTokenAccount = tokenAccounts.value[0].pubkey;
     }
 
     const swapResponse = await this.jupiterApi.swapPost({
@@ -105,7 +105,7 @@ export default class SolanaBot {
     if (swapConfirmation.value.err)
       throw new Error("Swap transaction failed to confirm");
     console.log(
-      `✅ Swap transaction confirmed: ${Config.solscan.txUrl}/${swapTxSignature}`
+      `✅ Swap transaction confirmed: ${Config.bloackchainExplorer.txUrl}/${swapTxSignature}`
     );
 
     return { outAmount: quote.outAmount, swapTxSignature };
@@ -115,16 +115,16 @@ export default class SolanaBot {
     destinationWalletAddress: PublicKey,
     sellTokenAddress: PublicKey,
     buyTokenAddress: PublicKey,
-    outAmount: string
+    outAmount: string,
+    buyTokenDecimals: number = 8
   ): Promise<{
     amountPurchased: number;
     gasTokenBalance: number;
     sellTokenBalance: number;
     buyTokenBalance: number;
   }> {
-    const cbBTCDecimals = 8;
     const usdcDecimals = 6;
-    const amountPurchased = Number(outAmount) / 10 ** cbBTCDecimals;
+    const amountPurchased = Number(outAmount) / 10 ** buyTokenDecimals;
 
     const solBalance = await getSolanaBalanceAsync(
       this.connection,
@@ -136,18 +136,18 @@ export default class SolanaBot {
       sellTokenAddress,
       usdcDecimals
     );
-    const destinationcbBTCBalance = await getTokenBalanceAsync(
+    const destinationTokenBalance = await getTokenBalanceAsync(
       this.connection,
       destinationWalletAddress,
       buyTokenAddress,
-      cbBTCDecimals
+      buyTokenDecimals
     );
 
     return {
       amountPurchased,
       gasTokenBalance: solBalance,
       sellTokenBalance: usdcBalance,
-      buyTokenBalance: destinationcbBTCBalance,
+      buyTokenBalance: destinationTokenBalance,
     };
   }
 }

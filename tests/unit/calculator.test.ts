@@ -24,8 +24,8 @@ describe("Calculator", () => {
 
     test("calculates positive ROI correctly", async () => {
       mockRepo.seedTransactions([
-        { date: new Date(), wallet: "wallet1", amount: 100, btcPrice: 40000 },
-        { date: new Date(), wallet: "wallet1", amount: 100, btcPrice: 45000 },
+        { date: new Date(), wallet: "wallet1", amount: 100, tokenPrice: 40000 },
+        { date: new Date(), wallet: "wallet1", amount: 100, tokenPrice: 45000 },
       ]);
 
       const stats = await calculator.determineBotStatsAsync(
@@ -42,7 +42,7 @@ describe("Calculator", () => {
 
     test("calculates negative ROI correctly", async () => {
       mockRepo.seedTransactions([
-        { date: new Date(), wallet: "wallet1", amount: 100, btcPrice: 60000 },
+        { date: new Date(), wallet: "wallet1", amount: 100, tokenPrice: 60000 },
       ]);
 
       const stats = await calculator.determineBotStatsAsync(
@@ -59,8 +59,8 @@ describe("Calculator", () => {
 
     test("only includes transactions for specified wallet", async () => {
       mockRepo.seedTransactions([
-        { date: new Date(), wallet: "wallet1", amount: 100, btcPrice: 40000 },
-        { date: new Date(), wallet: "wallet2", amount: 200, btcPrice: 45000 },
+        { date: new Date(), wallet: "wallet1", amount: 100, tokenPrice: 40000 },
+        { date: new Date(), wallet: "wallet2", amount: 200, tokenPrice: 45000 },
       ]);
 
       const stats = await calculator.determineBotStatsAsync(
@@ -74,8 +74,8 @@ describe("Calculator", () => {
 
     test("calculates average buy price correctly", async () => {
       mockRepo.seedTransactions([
-        { date: new Date(), wallet: "wallet1", amount: 50, btcPrice: 40000 },
-        { date: new Date(), wallet: "wallet1", amount: 50, btcPrice: 60000 },
+        { date: new Date(), wallet: "wallet1", amount: 50, tokenPrice: 40000 },
+        { date: new Date(), wallet: "wallet1", amount: 50, tokenPrice: 60000 },
       ]);
 
       const stats = await calculator.determineBotStatsAsync(
@@ -90,7 +90,7 @@ describe("Calculator", () => {
 
     test("handles single transaction", async () => {
       mockRepo.seedTransactions([
-        { date: new Date(), wallet: "wallet1", amount: 50, btcPrice: 45000 },
+        { date: new Date(), wallet: "wallet1", amount: 50, tokenPrice: 45000 },
       ]);
 
       const stats = await calculator.determineBotStatsAsync(

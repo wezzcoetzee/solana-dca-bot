@@ -10,13 +10,13 @@ export class MockTransactionRepository implements ITransactionRepository {
   async insertTransactionAsync(
     wallet: string,
     amount: number,
-    btcPrice: number
+    tokenPrice: number
   ): Promise<void> {
     this.transactions.push({
       date: new Date(),
       wallet,
       amount,
-      btcPrice,
+      tokenPrice,
     });
   }
 

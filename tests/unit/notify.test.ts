@@ -22,6 +22,7 @@ describe("Notify", () => {
     profit: 200,
     roi: 20,
     averageBuyPrice: 45000,
+    tokenSymbol: "cbBTC",
     ...overrides,
   });
 
@@ -100,13 +101,13 @@ describe("Notify", () => {
       expect(message).not.toContain("TOPUP REQUIRED");
     });
 
-    test("includes Solscan link", async () => {
+    test("includes Orbmarkets link", async () => {
       await notify.notifyAsync(
         createNotification({ transactionSignature: "txsig123" })
       );
 
       const message = mockProvider.getLastMessage();
-      expect(message).toContain("Solscan");
+      expect(message).toContain("Orbmarkets");
       expect(message).toContain("txsig123");
     });
 

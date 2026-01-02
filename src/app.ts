@@ -20,8 +20,11 @@ console.log(VERSION);
 console.log("");
 
 const destinationWallet = new PublicKey(process.env.DEST_WALLET || "");
-const buyingTokenAddress = new PublicKey(process.env.CB_BTC_ADDRESS || "");
+const buyingTokenAddress = new PublicKey(process.env.TARGET_TOKEN_ADDRESS || "");
 const sellingTokenAddress = new PublicKey(process.env.USDC_ADDRESS || "");
+const targetTokenSymbol = process.env.TARGET_TOKEN_SYMBOL || "TOKEN";
+const targetTokenDecimals = Number(process.env.TARGET_TOKEN_DECIMALS) || 8;
+const targetTokenCoingeckoId = process.env.TARGET_TOKEN_COINGECKO_ID || "bitcoin";
 const usdAmount = Number(process.env.USD_AMOUNT_BUY) || 5;
 const amountLamports = usdAmount * 1_000_000;
 const runSchedule = process.env.SCHEDULE || "0 0,12 * * *";
@@ -50,7 +53,7 @@ async function run() {
       destinationWallet
     );
 
-    const price = await coingecko.getBitcoinPriceAsync();
+    const price = await coingecko.getPriceAsync(targetTokenCoingeckoId);
 
     await databaseProvider.insertTransactionAsync(
       destinationWallet.toString(),
@@ -66,7 +69,8 @@ async function run() {
       destinationWallet,
       sellingTokenAddress,
       buyingTokenAddress,
-      outAmount
+      outAmount,
+      targetTokenDecimals
     );
 
     const botStats = await calculator.determineBotStatsAsync(
@@ -84,6 +88,7 @@ async function run() {
       tokenPrice: price,
       transactionSignature: swapTxSignature,
       usdAmountPurchased: usdAmount,
+      tokenSymbol: targetTokenSymbol,
     });
 
     retries = 0;
@@ -114,13 +119,13 @@ if (localTest) {
 } else {
   schedule.scheduleJob(runSchedule, () => {
     console.log(
-      "🤖 Running cbBTC buy and transfer every 12 hours at",
+      `🤖 Running ${targetTokenSymbol} buy and transfer at`,
       new Date()
     );
     run();
   });
 
   uptimeLogger(() => {
-    console.log("🤖 Bot (USDC -> cbBTC) started at", new Date());
+    console.log(`🤖 Bot (USDC -> ${targetTokenSymbol}) started at`, new Date());
   });
 }

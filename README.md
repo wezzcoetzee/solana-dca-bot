@@ -1,6 +1,6 @@
 # Dollar Cost Average Bot
 
-A cryptocurrency DCA (Dollar Cost Averaging) bot for Solana. Automatically purchases cbBTC using USDC on a schedule and sends notifications via Telegram.
+A cryptocurrency DCA (Dollar Cost Averaging) bot for Solana. Automatically purchases any token using USDC on a schedule and sends notifications via Telegram.
 
 ## Table of Contents
 
@@ -23,8 +23,7 @@ A cryptocurrency DCA (Dollar Cost Averaging) bot for Solana. Automatically purch
 ### Roadmap
 
 - Specify time of day, interval, hourly buys, etc.
-- DCA into any token on Solana
-- DCA using any token
+- DCA using any token (not just USDC)
 - Show bot performance over time
 
 ## Architecture
@@ -88,24 +87,29 @@ Create a `.env` file in the project root:
 
 ```env
 # Database (PostgreSQL)
-DATABASE_URL="postgresql://user:password@localhost:5432/jupiter"
+DATABASE_URL=postgresql://user:password@localhost:5432/dca_bot
 
 # Schedule (cron format)
-SCHEDULE="0 0,12 * * *"
+SCHEDULE=0 0,12 * * *
 
 # Solana Configuration
 RPC_ENDPOINT=https://your-rpc-endpoint
 JUPITER_API_KEY=your-jupiter-api-key
-MNEMONIC="your twelve word seed phrase"
-DEST_WALLET=<cold-wallet-address>
-CB_BTC_ADDRESS=cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij
+MNEMONIC=your twelve word seed phrase here
+DEST_WALLET=your-cold-wallet-address
 USDC_ADDRESS=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 USD_AMOUNT_BUY=5
 SLIPPAGE=4
 
+# Target Token Configuration
+TARGET_TOKEN_ADDRESS=cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij
+TARGET_TOKEN_SYMBOL=cbBTC
+TARGET_TOKEN_DECIMALS=8
+TARGET_TOKEN_COINGECKO_ID=bitcoin
+
 # Telegram
-TELEGRAM_BOT_ID=<bot-token>
-TELEGRAM_CHAT_ID=<chat-id>
+TELEGRAM_BOT_ID=your-bot-token
+TELEGRAM_CHAT_ID=your-chat-id
 
 # Development
 LOCAL_TEST=false
@@ -113,19 +117,23 @@ LOCAL_TEST=false
 
 ### Configuration Options
 
-| Variable           | Required | Default         | Description                                      |
-|--------------------|----------|-----------------|--------------------------------------------------|
-| `DATABASE_URL`     | Yes      | -               | PostgreSQL connection string                     |
-| `SCHEDULE`         | No       | `0 0,12 * * *`  | Cron schedule for DCA (default: 12:00 and 00:00) |
-| `RPC_ENDPOINT`     | Yes      | -               | Solana RPC endpoint (e.g., Helius)               |
-| `JUPITER_API_KEY`  | Yes      | -               | Jupiter API key for swap quotes                  |
-| `MNEMONIC`         | Yes      | -               | 12-word seed phrase for bot wallet               |
-| `DEST_WALLET`      | Yes      | -               | Cold wallet address for purchased tokens         |
-| `USD_AMOUNT_BUY`   | No       | `5`             | USD amount per purchase                          |
-| `SLIPPAGE`         | No       | `4`             | Slippage in basis points (4 = 0.04%)             |
-| `TELEGRAM_BOT_ID`  | Yes      | -               | Telegram bot token                               |
-| `TELEGRAM_CHAT_ID` | Yes      | -               | Telegram chat ID for notifications               |
-| `LOCAL_TEST`       | No       | `false`         | Set to `true` to run immediately on startup      |
+| Variable                  | Required | Default         | Description                                      |
+|---------------------------|----------|-----------------|--------------------------------------------------|
+| `DATABASE_URL`            | Yes      | -               | PostgreSQL connection string                     |
+| `SCHEDULE`                | No       | `0 0,12 * * *`  | Cron schedule for DCA (default: 12:00 and 00:00) |
+| `RPC_ENDPOINT`            | Yes      | -               | Solana RPC endpoint (e.g., Helius)               |
+| `JUPITER_API_KEY`         | Yes      | -               | Jupiter API key for swap quotes                  |
+| `MNEMONIC`                | Yes      | -               | 12-word seed phrase for bot wallet               |
+| `DEST_WALLET`             | Yes      | -               | Cold wallet address for purchased tokens         |
+| `USD_AMOUNT_BUY`          | No       | `5`             | USD amount per purchase                          |
+| `SLIPPAGE`                | No       | `4`             | Slippage in basis points (4 = 0.04%)             |
+| `TARGET_TOKEN_ADDRESS`    | Yes      | -               | Token mint address to purchase                   |
+| `TARGET_TOKEN_SYMBOL`     | No       | `TOKEN`         | Token symbol for notifications                   |
+| `TARGET_TOKEN_DECIMALS`   | No       | `8`             | Token decimal places                             |
+| `TARGET_TOKEN_COINGECKO_ID`| No      | `bitcoin`       | CoinGecko ID for price data                      |
+| `TELEGRAM_BOT_ID`         | Yes      | -               | Telegram bot token                               |
+| `TELEGRAM_CHAT_ID`        | Yes      | -               | Telegram chat ID for notifications               |
+| `LOCAL_TEST`              | No       | `false`         | Set to `true` to run immediately on startup      |
 
 ### Getting a Jupiter API Key
 

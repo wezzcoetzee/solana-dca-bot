@@ -18,29 +18,30 @@ export default class Notify {
       profit,
       roi,
       averageBuyPrice,
+      tokenSymbol,
     } = inputs;
 
     await this.notificationProvider.sendMessage(
-      `Successfully bought **${amountPurchased} cbBTC** ($${usdAmountPurchased}) @ $${tokenPrice} per BTC!
+      `Successfully bought **${amountPurchased} ${tokenSymbol}** ($${usdAmountPurchased}) @ $${tokenPrice} per ${tokenSymbol}!
 
 Bot Wallet Balances:
   - SOL: ${gasTokenBalance} ${gasTokenBalance < 0.01 ? "TOPUP REQUIRED" : ""}
   - USDC: ${sellTokenBalance} ${sellTokenBalance < 100 ? "TOPUP REQUIRED" : ""}
 
 Cold Wallet Balances:
-  - cbBTC: ${buyTokenBalance}
+  - ${tokenSymbol}: ${buyTokenBalance}
   - Value: $${Number(buyTokenBalance) * tokenPrice}
 
 Stats
   - Total Spent: $${totalSpent}
-  - Total BTC: ${buyTokenBalance}
+  - Total ${tokenSymbol}: ${buyTokenBalance}
   - Value: $${currentValue}
   - Average Buy Price: $${averageBuyPrice}
   - Profit: $${profit}
   - ROI: ${roi}%
 
 -----------------------------------------
-[View on Solscan](${Config.solscan.txUrl}/${transactionSignature})
+[View on Orbmarkets](${Config.bloackchainExplorer.txUrl}/${transactionSignature})
       `
     );
   }

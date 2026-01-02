@@ -3,14 +3,14 @@ export interface Transaction {
   date: Date;
   wallet: string;
   amount: number;
-  btcPrice: number;
+  tokenPrice: number;
 }
 
 export interface ITransactionRepository {
   insertTransactionAsync(
     wallet: string,
     amount: number,
-    btcPrice: number
+    tokenPrice: number
   ): Promise<void>;
   getTransactionsAsync(wallet: string): Promise<Transaction[]>;
 }
@@ -40,4 +40,5 @@ export interface Notification extends CalculatorResponse {
   tokenPrice: number;
   transactionSignature: string;
   usdAmountPurchased: number;
+  tokenSymbol: string;
 }
