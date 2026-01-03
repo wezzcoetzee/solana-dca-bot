@@ -35,6 +35,18 @@ console.log(bot.publicKey.toString());
 console.log("Fund this wallet with SOL (for fees) and USDC (to swap)");
 console.log("");
 
+console.log('ENVIRONMENT VARIABLES:');
+console.log('DEST_WALLET:', process.env.DEST_WALLET);
+console.log('TARGET_TOKEN_ADDRESS:', process.env.TARGET_TOKEN_ADDRESS);
+console.log('USDC_ADDRESS:', process.env.USDC_ADDRESS);
+console.log('TARGET_TOKEN_SYMBOL:', process.env.TARGET_TOKEN_SYMBOL);
+console.log('TARGET_TOKEN_DECIMALS:', process.env.TARGET_TOKEN_DECIMALS);
+console.log('TARGET_TOKEN_COINGECKO_ID:', process.env.TARGET_TOKEN_COINGECKO_ID);
+console.log('USD_AMOUNT_BUY:', process.env.USD_AMOUNT_BUY);
+console.log('SCHEDULE:', process.env.SCHEDULE);
+console.log('LOCAL_TEST:', process.env.LOCAL_TEST);
+console.log('--------------------------------');
+
 const databaseProvider = await DatabaseProvider.create();
 const coingecko = new CoinGeckoProvider();
 const notify = new Notify(new TelegramProvider());
@@ -45,6 +57,7 @@ const maxRetries = 5;
 
 async function run() {
   console.log(`🤖 Bot running with wallet: ${bot.publicKey.toString()}`);
+
   try {
     const { outAmount, swapTxSignature } = await bot.buyAndTransferAsync(
       buyingTokenAddress,
