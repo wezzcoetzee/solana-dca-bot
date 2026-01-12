@@ -1,48 +1,11 @@
 import type { INotificationProvider, Notification } from "../interfaces";
-import { Config } from "./config";
+import { formatNotificationMessage } from "./message-formatter";
 
 export default class Notify {
   constructor(private notificationProvider: INotificationProvider) {}
 
-  async notifyAsync(inputs: Notification): Promise<void> {
-    const {
-      amountPurchased,
-      buyTokenBalance,
-      gasTokenBalance,
-      sellTokenBalance,
-      tokenPrice,
-      transactionSignature,
-      usdAmountPurchased,
-      totalSpent,
-      currentValue,
-      profit,
-      roi,
-      averageBuyPrice,
-      tokenSymbol,
-    } = inputs;
-
-    await this.notificationProvider.sendMessage(
-      `Successfully bought **${amountPurchased} ${tokenSymbol}** ($${usdAmountPurchased}) @ $${tokenPrice} per ${tokenSymbol}!
-
-Bot Wallet Balances:
-  - SOL: ${gasTokenBalance} ${gasTokenBalance < 0.01 ? "TOPUP REQUIRED" : ""}
-  - USDC: ${sellTokenBalance} ${sellTokenBalance < 100 ? "TOPUP REQUIRED" : ""}
-
-Cold Wallet Balances:
-  - ${tokenSymbol}: ${buyTokenBalance}
-  - Value: $${Number(buyTokenBalance) * tokenPrice}
-
-Stats
-  - Total Spent: $${totalSpent}
-  - Total ${tokenSymbol}: ${buyTokenBalance}
-  - Value: $${currentValue}
-  - Average Buy Price: $${averageBuyPrice}
-  - Profit: $${profit}
-  - ROI: ${roi}%
-
------------------------------------------
-[View on Orbmarkets](${Config.bloackchainExplorer.txUrl}/${transactionSignature})
-      `
-    );
+  async notifyAsync(notification: Notification): Promise<void> {
+    const message = formatNotificationMessage(notification);
+    await this.notificationProvider.sendMessage(message);
   }
 }

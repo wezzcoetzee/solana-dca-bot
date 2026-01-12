@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import type { INotificationProvider } from "../interfaces";
 import { Config } from "../utils/config";
+import { validateResponse } from "../utils/http-utils";
 
 dotenv.config();
 
@@ -26,9 +27,7 @@ export default class TelegramProvider implements INotificationProvider {
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Telegram API error: ${response.status}`);
-    }
+    validateResponse(response, "Telegram");
 
     console.log("Telegram: Message sent successfully");
   }

@@ -31,16 +31,21 @@ A cryptocurrency DCA (Dollar Cost Averaging) bot for Solana. Automatically purch
 ```text
 src/
 ├── interfaces/         # TypeScript interfaces (SOLID - DIP)
-│   └── index.ts        # ITransactionRepository, IPriceProvider, INotificationProvider
+│   └── index.ts        # ITransactionRepository, IPriceProvider, INotificationProvider, ISwapProvider
 ├── providers/          # External service integrations
 │   ├── database.ts     # Prisma/PostgreSQL repository
 │   ├── coingecko.ts    # Price data provider
-│   └── telegram.ts     # Notification provider
-├── utils/              # Business logic
+│   ├── telegram.ts     # Notification provider
+│   └── jupiter.ts      # Jupiter swap provider
+├── utils/              # Business logic & utilities
 │   ├── calculator.ts   # ROI/stats calculations
-│   ├── notify.ts       # Notification formatting
-│   ├── solana-bot.ts   # Solana/Jupiter trading
-│   ├── solana.ts       # Solana utilities
+│   ├── notify.ts       # Notification dispatcher
+│   ├── message-formatter.ts  # Message formatting logic
+│   ├── solana-bot.ts   # Solana trading orchestrator
+│   ├── solana.ts       # Solana wallet utilities
+│   ├── token-utils.ts  # Token conversion utilities
+│   ├── http-utils.ts   # HTTP response validation
+│   ├── retry.ts        # Retry logic
 │   ├── logger.ts       # Uptime logging
 │   └── config.ts       # Static configuration
 ├── app.ts              # Application entry point
@@ -53,10 +58,13 @@ tests/
 
 ### Design Principles
 
-- **SOLID**: Interfaces for dependency inversion (ITransactionRepository, IPriceProvider, INotificationProvider)
-- **DRY**: Shared interfaces, centralized configuration
+- **SOLID**: Interfaces for dependency inversion (ITransactionRepository, IPriceProvider, INotificationProvider, ISwapProvider)
+  - Single Responsibility: Each class has one reason to change
+  - Interface Segregation: Split interfaces (TransactionDetails, WalletBalances, CalculatorResponse)
+  - Dependency Inversion: High-level modules depend on abstractions (e.g., SolanaBot uses ISwapProvider)
+- **DRY**: Shared utilities for token conversion, HTTP validation, retry logic
 - **KISS**: Simple, focused classes with single responsibilities
-- **YAGNI**: Minimal abstractions, no over-engineering
+- **YAGNI**: Removed unused code, added only necessary abstractions
 
 ## Prerequisites
 
@@ -156,8 +164,8 @@ Create a new wallet in Phantom and use the mnemonic seed phrase.
 bun run start
 
 # For debugging (triggers immediate run)
-# Add run() to the bottom of app.ts temporarily
-bun run debug
+# Set LOCAL_TEST=true in .env to run immediately on startup
+LOCAL_TEST=true bun run start
 ```
 
 ### Database Commands
@@ -242,6 +250,7 @@ docker-compose up -d
 ```
 
 This will:
+
 - Start a PostgreSQL database with persistent storage
 - Build and run the DCA bot
 - Automatically connect the bot to the database

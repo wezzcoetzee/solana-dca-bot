@@ -1,29 +1,46 @@
 import { describe, expect, test, beforeEach } from "bun:test";
 import Notify from "../../src/utils/notify";
 import { MockNotificationProvider } from "../mocks";
-import type { Notification } from "../../src/interfaces";
+import type {
+  Notification,
+  TransactionDetails,
+  WalletBalances,
+  CalculatorResponse,
+} from "../../src/interfaces";
 
 describe("Notify", () => {
   let notify: Notify;
   let mockProvider: MockNotificationProvider;
 
-  const createNotification = (
-    overrides: Partial<Notification> = {}
-  ): Notification => ({
-    amountPurchased: 0.001,
-    buyTokenBalance: 0.01,
-    gasTokenBalance: 1.5,
-    sellTokenBalance: 500,
-    tokenPrice: 50000,
-    transactionSignature: "abc123",
-    usdAmountPurchased: 50,
-    totalSpent: 1000,
-    currentValue: 1200,
-    profit: 200,
-    roi: 20,
-    averageBuyPrice: 45000,
-    tokenSymbol: "cbBTC",
-    ...overrides,
+  interface NotificationOverrides {
+    transaction?: Partial<TransactionDetails>;
+    balances?: Partial<WalletBalances>;
+    stats?: Partial<CalculatorResponse>;
+  }
+
+  const createNotification = (overrides: NotificationOverrides = {}): Notification => ({
+    transaction: {
+      amountPurchased: 0.001,
+      tokenPrice: 50000,
+      transactionSignature: "abc123",
+      usdAmountPurchased: 50,
+      tokenSymbol: "cbBTC",
+      ...overrides.transaction,
+    },
+    balances: {
+      gasTokenBalance: 1.5,
+      sellTokenBalance: 500,
+      buyTokenBalance: 0.01,
+      ...overrides.balances,
+    },
+    stats: {
+      totalSpent: 1000,
+      currentValue: 1200,
+      profit: 200,
+      roi: 20,
+      averageBuyPrice: 45000,
+      ...overrides.stats,
+    },
   });
 
   beforeEach(() => {
@@ -39,7 +56,9 @@ describe("Notify", () => {
     });
 
     test("includes purchase amount in message", async () => {
-      await notify.notifyAsync(createNotification({ amountPurchased: 0.002 }));
+      await notify.notifyAsync(
+        createNotification({ transaction: { amountPurchased: 0.002 } })
+      );
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("0.002 cbBTC");
@@ -47,7 +66,7 @@ describe("Notify", () => {
 
     test("includes USD amount in message", async () => {
       await notify.notifyAsync(
-        createNotification({ usdAmountPurchased: 100 })
+        createNotification({ transaction: { usdAmountPurchased: 100 } })
       );
 
       const message = mockProvider.getLastMessage();
@@ -55,35 +74,41 @@ describe("Notify", () => {
     });
 
     test("includes token price in message", async () => {
-      await notify.notifyAsync(createNotification({ tokenPrice: 60000 }));
+      await notify.notifyAsync(
+        createNotification({ transaction: { tokenPrice: 60000 } })
+      );
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("$60000");
     });
 
     test("includes ROI in message", async () => {
-      await notify.notifyAsync(createNotification({ roi: 25 }));
+      await notify.notifyAsync(createNotification({ stats: { roi: 25 } }));
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("ROI: 25%");
     });
 
     test("includes profit in message", async () => {
-      await notify.notifyAsync(createNotification({ profit: 500 }));
+      await notify.notifyAsync(createNotification({ stats: { profit: 500 } }));
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("Profit: $500");
     });
 
     test("includes low SOL balance warning", async () => {
-      await notify.notifyAsync(createNotification({ gasTokenBalance: 0.005 }));
+      await notify.notifyAsync(
+        createNotification({ balances: { gasTokenBalance: 0.005 } })
+      );
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("TOPUP REQUIRED");
     });
 
     test("includes low USDC balance warning", async () => {
-      await notify.notifyAsync(createNotification({ sellTokenBalance: 50 }));
+      await notify.notifyAsync(
+        createNotification({ balances: { sellTokenBalance: 50 } })
+      );
 
       const message = mockProvider.getLastMessage();
       expect(message).toContain("TOPUP REQUIRED");
@@ -92,8 +117,7 @@ describe("Notify", () => {
     test("does not include warning when balances are sufficient", async () => {
       await notify.notifyAsync(
         createNotification({
-          gasTokenBalance: 1.0,
-          sellTokenBalance: 500,
+          balances: { gasTokenBalance: 1.0, sellTokenBalance: 500 },
         })
       );
 
@@ -103,7 +127,7 @@ describe("Notify", () => {
 
     test("includes Orbmarkets link", async () => {
       await notify.notifyAsync(
-        createNotification({ transactionSignature: "txsig123" })
+        createNotification({ transaction: { transactionSignature: "txsig123" } })
       );
 
       const message = mockProvider.getLastMessage();
@@ -114,9 +138,11 @@ describe("Notify", () => {
     test("includes wallet balances", async () => {
       await notify.notifyAsync(
         createNotification({
-          gasTokenBalance: 2.5,
-          sellTokenBalance: 750,
-          buyTokenBalance: 0.05,
+          balances: {
+            gasTokenBalance: 2.5,
+            sellTokenBalance: 750,
+            buyTokenBalance: 0.05,
+          },
         })
       );
 
@@ -129,9 +155,11 @@ describe("Notify", () => {
     test("includes stats section", async () => {
       await notify.notifyAsync(
         createNotification({
-          totalSpent: 2000,
-          currentValue: 2500,
-          averageBuyPrice: 48000,
+          stats: {
+            totalSpent: 2000,
+            currentValue: 2500,
+            averageBuyPrice: 48000,
+          },
         })
       );
 

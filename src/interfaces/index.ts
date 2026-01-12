@@ -18,7 +18,6 @@ export interface ITransactionRepository {
 }
 
 export interface IPriceProvider {
-  getBitcoinPriceAsync(): Promise<number>;
   getPriceAsync(token: string): Promise<number>;
 }
 
@@ -34,13 +33,37 @@ export interface CalculatorResponse {
   averageBuyPrice: number;
 }
 
-export interface Notification extends CalculatorResponse {
-  amountPurchased: number;
-  buyTokenBalance: number;
+export interface WalletBalances {
   gasTokenBalance: number;
   sellTokenBalance: number;
+  buyTokenBalance: number;
+}
+
+export interface TransactionDetails {
+  amountPurchased: number;
   tokenPrice: number;
   transactionSignature: string;
   usdAmountPurchased: number;
   tokenSymbol: string;
+}
+
+export interface Notification {
+  transaction: TransactionDetails;
+  balances: WalletBalances;
+  stats: CalculatorResponse;
+}
+
+export interface SwapResult {
+  outAmount: string;
+  signature: string;
+}
+
+export interface ISwapProvider {
+  executeSwapAsync(
+    inputMint: string,
+    outputMint: string,
+    amount: number,
+    destinationWallet: string,
+    slippageBps: number
+  ): Promise<SwapResult>;
 }

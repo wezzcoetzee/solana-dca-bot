@@ -7,8 +7,9 @@ import TelegramProvider from "./providers/telegram";
 import { uptimeLogger } from "./utils/logger";
 import Bot from "./utils/solana-bot";
 import Notify from "./utils/notify";
-import { sleep } from "bun";
 import Calculator from "./utils/calculator";
+import { usdToUsdcLamports } from "./utils/token-utils";
+import { withRetry } from "./utils/retry";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ const targetTokenSymbol = process.env.TARGET_TOKEN_SYMBOL || "TOKEN";
 const targetTokenDecimals = Number(process.env.TARGET_TOKEN_DECIMALS) || 8;
 const targetTokenCoingeckoId = process.env.TARGET_TOKEN_COINGECKO_ID || "bitcoin";
 const usdAmount = Number(process.env.USD_AMOUNT_BUY) || 5;
-const amountLamports = usdAmount * 1_000_000;
+const amountLamports = usdToUsdcLamports(usdAmount);
 const runSchedule = process.env.SCHEDULE || "0 0,12 * * *";
 
 const bot = new Bot();
@@ -52,34 +53,30 @@ const coingecko = new CoinGeckoProvider();
 const notify = new Notify(new TelegramProvider());
 const calculator = new Calculator(databaseProvider);
 
-let retries = 0;
-const maxRetries = 5;
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 10000;
 
-async function run() {
+async function executeBotRun(): Promise<void> {
   console.log(`🤖 Bot running with wallet: ${bot.publicKey.toString()}`);
 
-  try {
-    const { outAmount, swapTxSignature } = await bot.buyAndTransferAsync(
-      buyingTokenAddress,
-      sellingTokenAddress,
-      amountLamports,
-      destinationWallet
-    );
+  const { outAmount, swapTxSignature } = await bot.buyAndTransferAsync(
+    buyingTokenAddress,
+    sellingTokenAddress,
+    amountLamports,
+    destinationWallet
+  );
 
-    const price = await coingecko.getPriceAsync(targetTokenCoingeckoId);
+  const price = await coingecko.getPriceAsync(targetTokenCoingeckoId);
 
-    await databaseProvider.insertTransactionAsync(
-      destinationWallet.toString(),
-      usdAmount,
-      price,
-      targetTokenSymbol
-    );
-    const {
-      amountPurchased,
-      gasTokenBalance,
-      sellTokenBalance,
-      buyTokenBalance,
-    } = await bot.getWalletBalancesAsync(
+  await databaseProvider.insertTransactionAsync(
+    destinationWallet.toString(),
+    usdAmount,
+    price,
+    targetTokenSymbol
+  );
+
+  const { amountPurchased, gasTokenBalance, sellTokenBalance, buyTokenBalance } =
+    await bot.getWalletBalancesAsync(
       destinationWallet,
       sellingTokenAddress,
       buyingTokenAddress,
@@ -87,41 +84,40 @@ async function run() {
       targetTokenDecimals
     );
 
-    const botStats = await calculator.determineBotStatsAsync(
-      destinationWallet.toString(),
-      buyTokenBalance,
-      price
-    );
+  const botStats = await calculator.determineBotStatsAsync(
+    destinationWallet.toString(),
+    buyTokenBalance,
+    price
+  );
 
-    await notify.notifyAsync({
-      ...botStats,
+  await notify.notifyAsync({
+    transaction: {
       amountPurchased,
-      gasTokenBalance,
-      sellTokenBalance,
-      buyTokenBalance,
       tokenPrice: price,
       transactionSignature: swapTxSignature,
       usdAmountPurchased: usdAmount,
       tokenSymbol: targetTokenSymbol,
+    },
+    balances: {
+      gasTokenBalance,
+      sellTokenBalance,
+      buyTokenBalance,
+    },
+    stats: botStats,
+  });
+
+  console.log("🤖 Bot run completed successfully");
+}
+
+async function run(): Promise<void> {
+  try {
+    await withRetry(executeBotRun, {
+      maxAttempts: MAX_RETRIES,
+      delayMs: RETRY_DELAY_MS,
+      onRetry: (attempt) => console.log(`Retrying attempt ${attempt}`),
     });
-
-    retries = 0;
-    console.log(
-      `🤖 Bot run completed successfully, retries reset to ${retries}`
-    );
   } catch (error) {
-    console.error(error);
-
-    if (retries < maxRetries) {
-      retries++;
-      console.log(`Retrying attempt ${retries}`);
-      await sleep(10000);
-      run();
-    } else {
-      console.error(
-        `🤖 Bot run failed after ${retries} retries, check logs for more info`
-      );
-    }
+    console.error(`🤖 Bot run failed after ${MAX_RETRIES} retries, check logs for more info`);
   }
 }
 
@@ -143,3 +139,13 @@ if (localTest) {
     console.log(`🤖 Bot (USDC -> ${targetTokenSymbol}) started at`, new Date());
   });
 }
+
+async function shutdown(): Promise<void> {
+  console.log("\n🛑 Shutting down gracefully...");
+  await databaseProvider.disconnect();
+  console.log("✅ Database disconnected");
+  process.exit(0);
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
