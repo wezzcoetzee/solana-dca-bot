@@ -117,7 +117,8 @@ async function run(): Promise<void> {
       onRetry: (attempt) => console.log(`Retrying attempt ${attempt}`),
     });
   } catch (error) {
-    console.error(`🤖 Bot run failed after ${MAX_RETRIES} retries, check logs for more info`);
+    console.error(`🤖 Bot run failed after ${MAX_RETRIES} retries:`);
+    console.error(error);
   }
 }
 
@@ -125,14 +126,14 @@ const localTest = process.env.LOCAL_TEST === "true";
 
 if (localTest) {
   console.log("🧪 LOCAL_TEST mode enabled - running immediately");
-  run();
+  await run();
 } else {
   schedule.scheduleJob(runSchedule, () => {
     console.log(
       `🤖 Running ${targetTokenSymbol} buy and transfer at`,
       new Date()
     );
-    run();
+    run().catch((err) => console.error("Scheduled run failed:", err));
   });
 
   uptimeLogger(() => {

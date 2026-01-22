@@ -77,7 +77,7 @@ export default class JupiterSwapProvider implements ISwapProvider {
     console.log(`✅ Swap transaction sent: ${signature}`);
 
     const confirmation = await this.connection.confirmTransaction(
-      { signature } as any,
+      signature,
       "confirmed"
     );
 
