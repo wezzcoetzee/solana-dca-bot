@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, mock } from "bun:test";
-import DatabaseProvider from "../../src/providers/database";
+import DatabaseProvider from "../database";
 
 describe("DatabaseProvider", () => {
   let mockPrisma: any;

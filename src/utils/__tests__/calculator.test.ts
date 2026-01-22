@@ -1,6 +1,6 @@
 import { describe, expect, test, beforeEach } from "bun:test";
-import Calculator from "../../src/utils/calculator";
-import { MockTransactionRepository } from "../mocks";
+import Calculator from "../calculator";
+import { MockTransactionRepository } from "../../../tests/mocks";
 
 describe("Calculator", () => {
   let calculator: Calculator;

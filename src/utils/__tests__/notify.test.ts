@@ -1,12 +1,12 @@
 import { describe, expect, test, beforeEach } from "bun:test";
-import Notify from "../../src/utils/notify";
-import { MockNotificationProvider } from "../mocks";
+import Notify from "../notify";
+import { MockNotificationProvider } from "../../../tests/mocks";
 import type {
   Notification,
   TransactionDetails,
   WalletBalances,
   CalculatorResponse,
-} from "../../src/interfaces";
+} from "../../interfaces";
 
 describe("Notify", () => {
   let notify: Notify;
