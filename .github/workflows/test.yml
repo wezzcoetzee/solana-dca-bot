@@ -26,6 +26,10 @@ jobs:
       - name: Run tests with coverage
         run: bun test --coverage --coverage-reporter=lcov --coverage-reporter=text
 
+      - name: Install lcov
+        if: github.event_name == 'pull_request'
+        run: sudo apt-get install -y lcov
+
       - name: Report coverage
         uses: zgosalvez/github-actions-report-lcov@v4
         if: github.event_name == 'pull_request'
