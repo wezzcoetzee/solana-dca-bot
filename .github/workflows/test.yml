@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: bun run db:generate
+
       - name: Run tests with coverage
         run: bun test --coverage --coverage-reporter=lcov --coverage-reporter=text
 
