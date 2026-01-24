@@ -57,7 +57,7 @@ describe("SolanaBot", () => {
       process.env = originalEnv;
     });
 
-    test("should use slippage from environment variable", () => {
+    test("should use slippage from environment variable", async () => {
       // #given - custom slippage
       process.env.SLIPPAGE = "10";
       const customBot = new SolanaBot(mockSwapProvider);
@@ -67,18 +67,16 @@ describe("SolanaBot", () => {
       const sellToken = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
       const destWallet = new PublicKey("11111111111111111111111111111111");
 
-      customBot.buyAndTransferAsync(buyToken, sellToken, 5000000, destWallet);
+      await customBot.buyAndTransferAsync(buyToken, sellToken, 5000000, destWallet);
 
       // #then - check slippage in swap call
-      setTimeout(() => {
-        expect(mockSwapProvider.swapCalls[0].slippageBps).toBe(10);
-      }, 100);
+      expect(mockSwapProvider.swapCalls[0].slippageBps).toBe(10);
 
       // cleanup
       process.env = originalEnv;
     });
 
-    test("should use default slippage when env variable not set", () => {
+    test("should use default slippage when env variable not set", async () => {
       // #given - no slippage env var
       delete process.env.SLIPPAGE;
       const customBot = new SolanaBot(mockSwapProvider);
@@ -88,12 +86,10 @@ describe("SolanaBot", () => {
       const sellToken = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
       const destWallet = new PublicKey("11111111111111111111111111111111");
 
-      customBot.buyAndTransferAsync(buyToken, sellToken, 5000000, destWallet);
+      await customBot.buyAndTransferAsync(buyToken, sellToken, 5000000, destWallet);
 
       // #then - default is 4
-      setTimeout(() => {
-        expect(mockSwapProvider.swapCalls[0].slippageBps).toBe(4);
-      }, 100);
+      expect(mockSwapProvider.swapCalls[0].slippageBps).toBe(4);
 
       // cleanup
       process.env = originalEnv;
