@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, mock } from "bun:test";
+import { describe, expect, test, beforeEach, afterEach, mock } from "bun:test";
 import TelegramProvider from "../telegram";
 
 describe("TelegramProvider", () => {
@@ -15,6 +15,11 @@ describe("TelegramProvider", () => {
     process.env.TELEGRAM_CHAT_ID = "-1001234567890";
 
     provider = new TelegramProvider();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    process.env = originalEnv;
   });
 
   describe("sendMessage", () => {
@@ -48,10 +53,6 @@ describe("TelegramProvider", () => {
           }),
         }
       );
-
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should send message with markdown formatting", async () => {
@@ -75,9 +76,6 @@ describe("TelegramProvider", () => {
       expect(body.parse_mode).toBe("Markdown");
       expect(body.text).toBe(markdownMessage);
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should send multiline message", async () => {
@@ -100,9 +98,6 @@ describe("TelegramProvider", () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.text).toBe(multilineMessage);
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should send empty message", async () => {
@@ -124,9 +119,6 @@ describe("TelegramProvider", () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.text).toBe("");
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should send very long message", async () => {
@@ -149,9 +141,6 @@ describe("TelegramProvider", () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.text).toBe(longMessage);
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 400 Bad Request", async () => {
@@ -170,9 +159,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 400 Bad Request"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 401 Unauthorized", async () => {
@@ -191,9 +177,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 401 Unauthorized"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 403 Forbidden", async () => {
@@ -212,9 +195,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 403 Forbidden"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 404 Not Found", async () => {
@@ -233,9 +213,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 404 Not Found"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 429 Too Many Requests", async () => {
@@ -254,9 +231,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 429 Too Many Requests"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should throw error on 500 Internal Server Error", async () => {
@@ -275,9 +249,6 @@ describe("TelegramProvider", () => {
         "[Telegram] HTTP error: 500 Internal Server Error"
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should handle network errors", async () => {
@@ -289,9 +260,6 @@ describe("TelegramProvider", () => {
       // #when / #then
       await expect(provider.sendMessage("Test")).rejects.toThrow("Network error");
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should construct correct URL from env variables", async () => {
@@ -317,9 +285,6 @@ describe("TelegramProvider", () => {
         expect.any(Object)
       );
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should use correct chat ID from env variables", async () => {
@@ -344,9 +309,6 @@ describe("TelegramProvider", () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.chat_id).toBe("-9876543210");
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should handle missing TELEGRAM_CHAT_ID env variable", async () => {
@@ -371,9 +333,6 @@ describe("TelegramProvider", () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.chat_id).toBe("");
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
 
     test("should send POST request with correct headers", async () => {
@@ -395,9 +354,6 @@ describe("TelegramProvider", () => {
       expect(callArgs[1].method).toBe("POST");
       expect(callArgs[1].headers["Content-Type"]).toBe("application/json");
 
-      // cleanup
-      global.fetch = originalFetch;
-      process.env = originalEnv;
     });
   });
 });
