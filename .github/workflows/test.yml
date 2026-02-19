@@ -33,7 +33,7 @@ jobs:
         run: sudo apt-get install -y lcov
 
       - name: Report coverage
-        uses: zgosalvez/github-actions-report-lcov@v4
+        uses: zgosalvez/github-actions-report-lcov@v7
         if: github.event_name == 'pull_request'
         with:
           coverage-files: coverage/lcov.info
